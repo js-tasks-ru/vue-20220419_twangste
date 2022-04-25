@@ -37,18 +37,14 @@ const RootComponent = defineComponent({
     };
   },
   computed: {
-    searchResult() {
-      return this.emails.filter((email) => !!this.search && email.includes(this.search));
-    },
-    searchResultCount() {
-      return this.searchResult.length;
-    },
-  },
-  methods: {
-    isMarked(email) {
-      return this.searchResult.includes(email);
+    extendedEmails() {
+      return this.emails.map((item) => ({
+        email: item,
+        isMarked: this.search && item.includes(this.search),
+      }));
     },
   },
+
   mounted() {
     fetch('https://jsonplaceholder.typicode.com/comments')
       .then((res) => res.json())
