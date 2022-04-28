@@ -11,8 +11,14 @@ export default defineComponent({
     },
   },
 
+  computed: {
+    coverImage() {
+      return this.image ? `--bg-url: url("${this.image}")` : '';
+    },
+  },
+
   template: `
-    <div class="meetup-cover" :style='{ "--bg-url: url({image})": image}'>
-        <h1 class="meetup-cover__title">{{title}}</h1>
+    <div class="meetup-cover" :style="coverImage">
+        <h1 class="meetup-cover__title">{{ title }}</h1>
     </div>`,
 });
