@@ -12,7 +12,7 @@ export default defineComponent({
       return new Date(this.date);
     },
     formatedMeetupDate() {
-      return this.meetupDate.toISOString();
+      return this.meetupDate.toISOString().slice(0, 10);
     },
     localizedMeetupDate() {
       return this.meetupDate.toLocaleDateString(navigator.language, { day: 'numeric', month: 'long', year: 'numeric' });
