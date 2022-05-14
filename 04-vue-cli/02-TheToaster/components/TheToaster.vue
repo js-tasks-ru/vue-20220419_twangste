@@ -1,13 +1,8 @@
 <template>
   <div class="toasts">
-    <div class="toast toast_success">
-      <ui-icon class="toast__icon" icon="check-circle" />
-      <span>Success Toast Example</span>
-    </div>
-
-    <div class="toast toast_error">
-      <ui-icon class="toast__icon" icon="alert-circle" />
-      <span>Error Toast Example</span>
+    <div v-for="toast in toasts" :key="toast.id" class="toast" :class="toast.class">
+      <ui-icon class="toast__icon" :icon="toast.icon" />
+      <span>{{ toast.message }}</span>
     </div>
   </div>
 </template>
@@ -15,10 +10,55 @@
 <script>
 import UiIcon from './UiIcon';
 
+const TOAST_TIMEOUT = 5 * 1000;
+
 export default {
   name: 'TheToaster',
 
   components: { UiIcon },
+
+  data() {
+    return {
+      toasts: [],
+    };
+  },
+
+  methods: {
+    addToast(type, message) {
+      const toast = {
+        id: Date.now(),
+        class: `toast_${type}`,
+        icon: this.getIcon(type),
+        message,
+      };
+      this.toasts.push(toast);
+      setTimeout(() => {
+        this.removeToast(toast.id);
+      }, TOAST_TIMEOUT);
+    },
+
+    removeToast(id) {
+      this.toasts = this.toasts.filter((item) => item.id !== id);
+    },
+
+    success(message) {
+      this.addToast('success', message);
+    },
+
+    error(message) {
+      this.addToast('error', message);
+    },
+
+    getIcon(type) {
+      switch (type) {
+        case 'success':
+          return 'check-circle';
+        case 'error':
+          return 'alert-circle';
+      }
+      return '';
+    },
+  },
 };
 </script>
 
