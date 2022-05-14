@@ -1,21 +1,22 @@
 <template>
   <div class="toasts">
-    <div v-for="toast in toasts" :key="toast.id" class="toast" :class="toast.class">
-      <ui-icon class="toast__icon" :icon="toast.icon" />
-      <span>{{ toast.message }}</span>
-    </div>
+    <ui-toast
+      v-for="toast in toasts"
+      :key="toast.id"
+      :type="toast.type"
+      :message="toast.message"
+      @onClose="removeToast(toast.id)"
+    />
   </div>
 </template>
 
 <script>
-import UiIcon from './UiIcon';
-
-const TOAST_TIMEOUT = 5 * 1000;
+import UiToast from './UiToast';
 
 export default {
   name: 'TheToaster',
 
-  components: { UiIcon },
+  components: { UiToast },
 
   data() {
     return {
@@ -27,14 +28,10 @@ export default {
     addToast(type, message) {
       const toast = {
         id: Date.now(),
-        class: `toast_${type}`,
-        icon: this.getIcon(type),
+        type,
         message,
       };
       this.toasts.push(toast);
-      setTimeout(() => {
-        this.removeToast(toast.id);
-      }, TOAST_TIMEOUT);
     },
 
     removeToast(id) {
@@ -47,16 +44,6 @@ export default {
 
     error(message) {
       this.addToast('error', message);
-    },
-
-    getIcon(type) {
-      switch (type) {
-        case 'success':
-          return 'check-circle';
-        case 'error':
-          return 'alert-circle';
-      }
-      return '';
     },
   },
 };
@@ -79,35 +66,5 @@ export default {
     bottom: 72px;
     right: 112px;
   }
-}
-
-.toast {
-  display: flex;
-  flex: 0 0 auto;
-  flex-direction: row;
-  align-items: center;
-  padding: 16px;
-  background: #ffffff;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-  border-radius: 4px;
-  font-size: 18px;
-  line-height: 28px;
-  width: auto;
-}
-
-.toast + .toast {
-  margin-top: 20px;
-}
-
-.toast__icon {
-  margin-right: 12px;
-}
-
-.toast.toast_success {
-  color: var(--green);
-}
-
-.toast.toast_error {
-  color: var(--red);
 }
 </style>
