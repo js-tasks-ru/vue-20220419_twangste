@@ -1,30 +1,78 @@
 <template>
-  <div class="dropdown dropdown_opened">
-    <button type="button" class="dropdown__toggle dropdown__toggle_icon">
-      <ui-icon icon="tv" class="dropdown__icon" />
-      <span>Title</span>
-    </button>
+  <div class="dropdown" :class="{ ['dropdown_opened']: isOpen }">
+    <ui-dropdown-item
+      class="dropdown dropdown__toggle"
+      :class="{ ['dropdown__toggle_icon']: isOptionsHasIcons }"
+      @click="toggleDropdownList"
+      :item="activeOption"
+      isTitle
+    />
 
-    <div class="dropdown__menu" role="listbox">
-      <button class="dropdown__item dropdown__item_icon" role="option" type="button">
-        <ui-icon icon="tv" class="dropdown__icon" />
-        Option 1
-      </button>
-      <button class="dropdown__item dropdown__item_icon" role="option" type="button">
-        <ui-icon icon="tv" class="dropdown__icon" />
-        Option 2
-      </button>
+    <div v-show="isOpen" class="dropdown__menu" role="listbox">
+      <ui-dropdown-item
+        v-for="item in options"
+        :key="item.value"
+        :item="item"
+        @click="itemClicked(item.value)"
+        :hasIcon="isOptionsHasIcons"
+      />
     </div>
   </div>
 </template>
 
 <script>
 import UiIcon from './UiIcon';
+import UiDropdownItem from './UiDropdownItem';
 
 export default {
   name: 'UiDropdown',
 
-  components: { UiIcon },
+  components: { UiIcon, UiDropdownItem },
+  props: {
+    options: {
+      type: Object,
+      required: true,
+    },
+    modelValue: {
+      type: String,
+    },
+    title: {
+      type: String,
+      required: true,
+    },
+  },
+  data() {
+    return {
+      isOpen: false,
+    };
+  },
+  computed: {
+    activeOption() {
+      return (
+        this.options.find((item) => item.value === this.modelValue) || {
+          value: '',
+          icon: '',
+          text: this.title,
+        }
+      );
+    },
+    isOptionsHasIcons() {
+      return !!this.options.filter((item) => item?.icon).length;
+    },
+  },
+  methods: {
+    toggleDropdownList() {
+      this.isOpen = !this.isOpen;
+    },
+    closeDropdownList() {
+      this.isOpen = false;
+    },
+    itemClicked(value) {
+      this.$emit('update:modelValue', value);
+
+      this.closeDropdownList();
+    },
+  },
 };
 </script>
 
@@ -108,39 +156,5 @@ export default {
   will-change: transform;
   right: auto;
   bottom: auto;
-}
-
-.dropdown__item {
-  padding: 8px 16px;
-  font-weight: 500;
-  font-size: 20px;
-  line-height: 28px;
-  background-color: var(--white);
-  box-shadow: none;
-  border: none;
-  cursor: pointer;
-  text-align: left;
-  transition-duration: 0.2s;
-  transition-property: background-color, border-color, color;
-  outline: none;
-  text-decoration: none;
-}
-
-.dropdown__item:hover,
-.dropdown__item:focus {
-  background-color: var(--grey-light);
-}
-
-.dropdown__item.dropdown__item_icon {
-  padding-left: 56px;
-  position: relative;
-}
-
-.dropdown__item.dropdown__item_icon .dropdown__icon,
-.dropdown__toggle_icon .dropdown__icon {
-  position: absolute;
-  top: 50%;
-  left: 16px;
-  transform: translate(0, -50%);
 }
 </style>
