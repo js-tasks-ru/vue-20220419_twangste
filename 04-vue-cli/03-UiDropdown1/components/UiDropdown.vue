@@ -7,16 +7,18 @@
       :item="activeOption"
       isTitle
     />
-
     <div v-show="isOpen" class="dropdown__menu" role="listbox">
       <ui-dropdown-item
         v-for="item in options"
         :key="item.value"
         :item="item"
-        @click="itemClicked(item.value)"
         :hasIcon="isOptionsHasIcons"
+        @click="itemClicked(item.value)"
       />
     </div>
+    <select v-show="false" :value="modelValue" @change="$emit('update:modelValue', $event.target.value)">
+      <option v-for="item in options" :key="item.value" :value="item.value">{{ item.text }}</option>
+    </select>
   </div>
 </template>
 
@@ -69,7 +71,6 @@ export default {
     },
     itemClicked(value) {
       this.$emit('update:modelValue', value);
-
       this.closeDropdownList();
     },
   },
