@@ -6,7 +6,7 @@
       :style="`--bg-url: url('${url}')`"
     >
       <span v-if="loading" class="image-uploader__text">Загрузка...</span>
-      <span v-else-if="!!url" class="image-uploader__text">Удалить изображение</span>
+      <span v-else-if="url" class="image-uploader__text">Удалить изображение</span>
       <span v-else class="image-uploader__text">Загрузить изображение</span>
       <input
         ref="input"
@@ -37,18 +37,16 @@ export default {
   emits: ['select', 'remove', 'upload', 'error'],
   data() {
     return {
-      file: null,
+      url: null,
       loading: false,
     };
   },
-  computed: {
-    url() {
-      return this.preview || (this.file instanceof File && URL.createObjectURL(this.file)) || null;
-    },
-  },
+
   watch: {
     preview: {
+      immediate: true,
       handler(value) {
+        this.url = value;
         if (!value) {
           this.removeFile();
         }
@@ -63,16 +61,16 @@ export default {
       }
     },
     removeFile() {
-      this.file = null;
+      this.url = null;
       this.$refs.input.value = null;
       this.$emit('remove');
     },
 
-    handleChange() {
-      const file = this.$refs?.input?.files[0];
+    handleChange(event) {
+      const file = event.target.files[0];
       this.$emit('select', file);
       if (this.uploader) this.uploadHandler(file);
-      else this.file = file;
+      else this.url = (file instanceof File && URL.createObjectURL(file)) || null;
     },
 
     async uploadHandler(file) {
@@ -80,6 +78,7 @@ export default {
         this.loading = true;
         const response = await this.uploader(file);
         this.$emit('upload', response);
+        this.url = response.image;
       } catch (error) {
         this.$emit('error', error);
         this.removeFile();
