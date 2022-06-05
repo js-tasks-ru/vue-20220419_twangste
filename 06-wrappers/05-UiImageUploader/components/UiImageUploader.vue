@@ -47,9 +47,9 @@ export default {
       immediate: true,
       handler(value) {
         this.url = value;
-        if (!value) {
-          this.removeFile();
-        }
+        // if (!value) {
+        //   this.removeFile();
+        // }
       },
     },
   },

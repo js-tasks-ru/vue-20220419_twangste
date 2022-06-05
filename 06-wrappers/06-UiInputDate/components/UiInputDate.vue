@@ -30,8 +30,9 @@ export default {
   computed: {
     value: {
       get() {
+        if (!this.modelValue) return '';
         const date = new Date(this.modelValue);
-        const hasStep = !!this.$attrs?.step;
+        const hasStep = !!this.$attrs?.step && this.$attrs.step % 60;
         switch (this.type) {
           case 'date':
             return date.toISOString().substr(0, 10);
