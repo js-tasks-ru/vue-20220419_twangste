@@ -1,31 +1,28 @@
 <template>
   <fieldset class="agenda-item-form">
-    <button type="button" class="agenda-item-form__remove-button">
+    <button type="button" class="agenda-item-form__remove-button" @click="$emit('remove')">
       <ui-icon icon="trash" />
     </button>
 
     <ui-form-group>
-      <ui-dropdown title="Тип" :options="$options.agendaItemTypeOptions" name="type" />
+      <ui-dropdown title="Тип" :options="$options.agendaItemTypeOptions" name="type" v-model="item.type" />
     </ui-form-group>
 
     <div class="agenda-item-form__row">
       <div class="agenda-item-form__col">
         <ui-form-group label="Начало">
-          <ui-input type="time" placeholder="00:00" name="startsAt" />
+          <ui-input type="time" placeholder="00:00" name="startsAt" v-model="item.startsAt" @change="startsAtChange" />
         </ui-form-group>
       </div>
       <div class="agenda-item-form__col">
         <ui-form-group label="Окончание">
-          <ui-input type="time" placeholder="00:00" name="endsAt" />
+          <ui-input type="time" placeholder="00:00" name="endsAt" v-model="item.endsAt" @change="endsAtChange" />
         </ui-form-group>
       </div>
     </div>
 
-    <ui-form-group label="Заголовок">
-      <ui-input name="title" />
-    </ui-form-group>
-    <ui-form-group label="Описание">
-      <ui-input multiline name="description" />
+    <ui-form-group v-for="formItem in schema" :label="formItem.label">
+      <component :is="formItem.component" v-bind="formItem.props" v-model="item[formItem.props.name]" />
     </ui-form-group>
   </fieldset>
 </template>
@@ -150,7 +147,8 @@ const agendaItemFormSchemas = {
     },
   },
 };
-
+const timeToMs = (time) => +new Date(`1970-01-01T${time}`);
+const msToTimeString = (ms) => new Date(ms).toTimeString().substr(0, 5);
 export default {
   name: 'MeetupAgendaItemForm',
 
@@ -163,6 +161,45 @@ export default {
     agendaItem: {
       type: Object,
       required: true,
+    },
+  },
+  emits: ['update:agendaItem', 'remove'],
+  data() {
+    return {
+      item: {},
+      duration: 0,
+    };
+  },
+  mounted() {
+    this.item = { ...this.agendaItem };
+    this.duration = this.getDuration();
+  },
+  computed: {
+    schema() {
+      return agendaItemFormSchemas[this.item.type];
+    },
+  },
+  watch: {
+    item: {
+      deep: true,
+      handler(value) {
+        this.$emit('update:agendaItem', value);
+      },
+    },
+  },
+  methods: {
+    startsAtChange(event) {
+      const endDateMs = timeToMs(event.target.value) + this.duration;
+      this.item.endsAt = msToTimeString(endDateMs);
+    },
+    endsAtChange(event) {
+      this.duration = this.getDuration();
+    },
+
+    getDuration() {
+      const startDate = timeToMs(this.item.startsAt);
+      const endDate = timeToMs(this.item.endsAt);
+      return endDate - startDate;
     },
   },
 };

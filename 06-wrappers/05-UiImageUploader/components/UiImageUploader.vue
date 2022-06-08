@@ -1,8 +1,20 @@
 <template>
   <div class="image-uploader">
-    <label class="image-uploader__preview image-uploader__preview-loading" style="--bg-url: url('/link.jpeg')">
-      <span class="image-uploader__text">Загрузить изображение</span>
-      <input type="file" accept="image/*" class="image-uploader__input" />
+    <label
+      class="image-uploader__preview"
+      :class="{ 'image-uploader__preview-loading': loading }"
+      :style="url ? `--bg-url: url('${url}')` : ''"
+    >
+      <span class="image-uploader__text">{{ imageUploaderText }}</span>
+      <input
+        ref="input"
+        type="file"
+        v-bind="$attrs"
+        accept="image/*"
+        class="image-uploader__input"
+        @change="handleChange"
+        @click="handleClick"
+      />
     </label>
   </div>
 </template>
@@ -10,6 +22,74 @@
 <script>
 export default {
   name: 'UiImageUploader',
+
+  props: {
+    preview: {
+      type: String,
+    },
+    uploader: {
+      type: Function,
+    },
+  },
+  inheritAttrs: false,
+  emits: ['select', 'remove', 'upload', 'error'],
+  data() {
+    return {
+      url: null,
+      loading: false,
+    };
+  },
+
+  watch: {
+    preview: {
+      immediate: true,
+      handler(value) {
+        this.url = value;
+        // if (!value) {
+        //   this.removeFile();
+        // }
+      },
+    },
+  },
+  computed: {
+    imageUploaderText() {
+      return this.loading ? 'Загрузка...' : this.url ? 'Удалить изображение' : 'Загрузить изображение';
+    },
+  },
+  methods: {
+    handleClick(event) {
+      if (this.url) {
+        this.removeFile();
+        event.preventDefault();
+      }
+    },
+    removeFile() {
+      this.url = null;
+      this.$refs.input.value = null;
+      this.$emit('remove');
+    },
+
+    handleChange(event) {
+      const file = event.target.files[0];
+      this.$emit('select', file);
+      if (this.uploader) this.uploadHandler(file);
+      else this.url = (file instanceof File && URL.createObjectURL(file)) || null;
+    },
+
+    async uploadHandler(file) {
+      try {
+        this.loading = true;
+        const response = await this.uploader(file);
+        this.$emit('upload', response);
+        this.url = response.image;
+      } catch (error) {
+        this.$emit('error', error);
+        this.removeFile();
+      } finally {
+        this.loading = false;
+      }
+    },
+  },
 };
 </script>
 
