@@ -3,11 +3,9 @@
     <label
       class="image-uploader__preview"
       :class="{ 'image-uploader__preview-loading': loading }"
-      :style="`--bg-url: url('${url}')`"
+      :style="url ? `--bg-url: url('${url}')` : ''"
     >
-      <span v-if="loading" class="image-uploader__text">Загрузка...</span>
-      <span v-else-if="url" class="image-uploader__text">Удалить изображение</span>
-      <span v-else class="image-uploader__text">Загрузить изображение</span>
+      <span class="image-uploader__text">{{ imageUploaderText }}</span>
       <input
         ref="input"
         type="file"
@@ -51,6 +49,11 @@ export default {
         //   this.removeFile();
         // }
       },
+    },
+  },
+  computed: {
+    imageUploaderText() {
+      return this.loading ? 'Загрузка...' : this.url ? 'Удалить изображение' : 'Загрузить изображение';
     },
   },
   methods: {

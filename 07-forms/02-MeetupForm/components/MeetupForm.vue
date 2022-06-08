@@ -30,12 +30,12 @@
 
       <h3 class="meetup-form__agenda-title">Программа</h3>
       <meetup-agenda-item-form
-        v-for="agendaItem in meetupItem.agenda"
+        v-for="(agendaItem, index) in meetupItem.agenda"
         :key="agendaItem.id"
         :agenda-item="agendaItem"
         class="meetup-form__agenda-item"
-        @update:agendaItem="updateAgendaItem($event)"
-        @remove="removeAgendaItem(agendaItem.id)"
+        @update:agendaItem="updateAgendaItem($event, index)"
+        @remove="removeAgendaItem(index)"
       />
 
       <div class="meetup-form__append">
@@ -128,20 +128,12 @@ export default {
       agenda.push(newItem);
     },
 
-    updateAgendaItem(value) {
-      let agenda = this.meetupItem.agenda;
-      const itemIndex = agenda.findIndex((item) => item.id === value.id);
-      if (itemIndex !== -1) {
-        agenda.splice(itemIndex, 1, value);
-      } else {
-        // тут сомнения у меня, правильно ли я сделал. Потому как без этой строки не проходит один тест
-        agenda.splice(agenda.length - 1, 1, value);
-        // очень странно когда в методе update меняется id элемента.
-      }
+    updateAgendaItem(value, index) {
+      this.meetupItem.agenda.splice(index, 1, value);
     },
 
-    removeAgendaItem(id) {
-      this.meetupItem.agenda = this.meetupItem.agenda.filter((item) => item.id !== id);
+    removeAgendaItem(index) {
+      this.meetupItem.agenda.splice(index, 1);
     },
 
     submitHandler() {

@@ -1,5 +1,5 @@
 <template>
-  <button @click="this.value++">{{ value.toString() }}</button>
+  <button @click="this.value++">{{ value }}</button>
 </template>
 
 <script>
